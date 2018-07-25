@@ -32,6 +32,11 @@ def reboot_vm(host_ip, vm_id):
     dom = conn.lookupByName(vm_id)
     if dom.info()[0] == 1:
         dom.reboot()
+    elif dom.info()[0] == 3:
+        dom.destroy()
+        dom.create()
+    elif dom.info()[0] == 5:
+        dom.create()
     else:
         pass
 

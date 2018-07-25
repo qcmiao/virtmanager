@@ -17,6 +17,8 @@
 
 <div class="panel panel-default">
     <!-- Default panel contents -->
+
+
     <div class="panel-heading"><h3>物理机列表</h3></div>
     <div class="panel-body">
 
@@ -39,11 +41,31 @@
             {% for info in host_info %}
             <tr>
                 <td><a href="/vm_list/{{ info.pk }}/"> {{ info.host_ip}} </a></td>
-                <td>{{ info.address }}</td>
-                <td>{{ info.cpu_remain }}</td>
-                <td>{{ info.mem_remain }}</td>
-                <td>{{ info.disk_remain }}</td>
-                <td>{{ info.description }}</td>
+                <td>
+                    {% if info.address  %}
+                    {{ info.address }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if info.cpu_remain  %}
+                    {{ info.cpu_remain }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if info.mem_remain  %}
+                    {{ info.mem_remain }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if info.disk_remain  %}
+                    {{ info.disk_remain }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if info.description  %}
+                    {{ info.description }}
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
             </tbody>
