@@ -21,16 +21,17 @@ from django.http import (HttpResponseRedirect,
 
 from rest_framework.views import APIView
 
-
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
 # def index(request):
 #     return render(request, 'index.html')
 
+
 def login(request):
     return render(request, 'login.html')
+
 
 @login_required
 def indexviewer(request):
@@ -38,20 +39,15 @@ def indexviewer(request):
 
 
 class LoginView(View):
-
     def get(self, request):
         return self.response(request)
 
     def post(self, request):
         form = AuthenticationForm(data=request.POST)
-
         if not form.is_valid():
             return self.response(request, form)
-
         user = form.get_user()
-
         auth_login(request, user)
-
         return HttpResponseRedirect(reverse("index"))
 
     def response(self, request, form=None):
@@ -72,20 +68,33 @@ def logout(request):
     auth_logout(request)
     return HttpResponseRedirect(reverse("index"))
 
+
 @login_required
 def hostviewer(request):
-    host_info = HostMachine.objects.all()
-    context = {'host_info': host_info}
-    return render(request, 'host_list.html', context)
+    host_info_list = HostMachine.objects.all()
+    paginator = Paginator(host_info_list, 10)  # Show 10 host per page
+    page = request.GET.get('page')
+    try:
+        host_info = paginator.page(page)
+    except PageNotAnInteger:
+        host_info = paginator.page(1)
+    except EmptyPage:
+        host_info = paginator.page(paginator.num_pages)
+    return render(request, 'host_list.html', {'host_info': host_info})
 
 
 @login_required
 def vmviewer(request):
-    vm_info = VirtMachine.objects.all()
-    context = {'vm_info': vm_info}
-    return render(request, 'vm_list.html', context)
-
-
+    vm_info_list = VirtMachine.objects.all()
+    paginator = Paginator(vm_info_list, 10)  # Show 10 vm per page
+    page = request.GET.get('page')
+    try:
+        vm_info = paginator.page(page)
+    except PageNotAnInteger:
+        vm_info = paginator.page(1)
+    except EmptyPage:
+        vm_info = paginator.page(paginator.num_pages)
+    return render(request, 'vm_list.html', {'vm_info': vm_info})
 
 
 @login_required
@@ -95,6 +104,7 @@ def vmviewer_detail(request,pk):
     vm_info = VirtMachine.objects.filter(host_machine_id=host_id)
     context = {'vm_info': vm_info, "host_ip": host_ip}
     return render(request, 'vm_list.html', context)
+
 
 @login_required
 def vm_start(request):
@@ -107,6 +117,7 @@ def vm_start(request):
     threading.Thread(target=start_vm, args=(host_ip, virt_id)).start()
     return HttpResponse('success')
 
+
 @login_required
 def vm_reboot(request):
     vmid = request.POST.get('id')
@@ -118,6 +129,7 @@ def vm_reboot(request):
     threading.Thread(target=reboot_vm, args=(host_ip, virt_id)).start()
     return HttpResponse('success')
 
+
 @login_required
 def vm_destroy(request):
     vmid = request.POST.get('id')
@@ -128,6 +140,7 @@ def vm_destroy(request):
     host_ip = host.host_ip
     threading.Thread(target=destroy_vm, args=(host_ip, virt_id)).start()
     return HttpResponse('success')
+
 
 @login_required
 def vm_suspend(request):

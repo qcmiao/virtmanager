@@ -23,24 +23,22 @@
     <div class="panel-body">
 
         <!-- Table -->
-
-
-
         <table class="table table-bordered table-hover">
             <thead>
             <tr>
                 <th>物理机管理IP</th>
                 <th>所在节点</th>
-                <th>CPU剩余</th>
-                <th>内存剩余</th>
-                <th>磁盘剩余</th>
+                <th>CPU剩余(Core)</th>
+                <th>内存剩余(G)</th>
+                <th>磁盘剩余(G)</th>
+                <th>虚机数量</th>
                 <th>备注</th>
             </tr>
             </thead>
             <tbody>
             {% for info in host_info %}
             <tr>
-                <td><a href="/vm_list/{{ info.pk }}/"> {{ info.host_ip}} </a></td>
+                <td>{{ info.host_ip}}</td>
                 <td>
                     {% if info.address  %}
                     {{ info.address }}
@@ -62,14 +60,44 @@
                     {% endif %}
                 </td>
                 <td>
+                    {% if info.virtmachine_set.all  %}
+                    <a href="/vm_list/{{ info.pk }}/">{{ info.virtmachine_set.all | length }}</a>
+                    {% endif %}
+
+                </td>
+
+                <td>
                     {% if info.description  %}
                     {{ info.description }}
                     {% endif %}
                 </td>
+
             </tr>
             {% endfor %}
             </tbody>
         </table>
+        <nav aria-label="Page navigation">
+            <ul class="pager">
+                <li>
+                    {% if host_info.has_previous %}
+                    <a href="?page={{ host_info.previous_page_number }}">
+                        上一页
+                    </a>
+                    {% endif %}
+                </li>
+                <li>
+
+                    第 {{ host_info.number }} 页 ; 总共{{ host_info.paginator.num_pages }}页.
+                </li>
+                <li>
+                    {% if host_info.has_next %}
+                    <a href="?page={{ host_info.next_page_number }}">
+                        下一页
+                    </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </nav>
     </div>
     <!--<div class="panel-footer"></div>-->
 </div>
