@@ -27,5 +27,6 @@ class VirtMachine(BaseModel):
     vm_status = models.CharField(max_length=40, null=True)
     cpu_num = models.CharField(max_length=40, null=True)
     mem_num = models.CharField(max_length=40, null=True)
+    vm_system = models.CharField(max_length=40, null=True)
     description = models.CharField(max_length=200, null=True)
     host_machine = models.ForeignKey('HostMachine')

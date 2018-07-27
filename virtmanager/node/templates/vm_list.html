@@ -56,7 +56,14 @@
                     {% endif %}
                 </td>
                 <td>{{ info.host_machine.host_ip }}</td>
-                <td>{{ info.vm_status }}</td>
+                <td>
+                    {% if info.vm_status == '1' %}
+                        运行中
+                    {% elif info.vm_status == '3' %}
+                        暂停
+                    {% elif info.vm_status == '5' %}
+                        关机
+                    {% endif %}
                 <td>
                     {% if info.cpu_num  %}
                     {{ info.cpu_num }}
