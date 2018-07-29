@@ -103,7 +103,7 @@ def vmviewer_detail(request,pk):
     host_ip = HostMachine.objects.get(id = host_id).host_ip
     vm_info = VirtMachine.objects.filter(host_machine_id=host_id)
     context = {'vm_info': vm_info, "host_ip": host_ip}
-    return render(request, 'vm_list.html', context)
+    return render(request, 'vm_list_detail.html', context)
 
 
 @login_required

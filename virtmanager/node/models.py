@@ -8,6 +8,9 @@ from common.models import BaseModel
 
 class HostMachine(BaseModel):
     host_ip = models.CharField(max_length=40)
+    host_ipmiip = models.CharField(max_length=40, null=True)
+    host_name = models.CharField(max_length=40, null=True)
+    host_sn = models.CharField(max_length=40, null=True)
     address = models.CharField(max_length=40, null=True)
     cpu_max = models.CharField(max_length=40, null=True)
     cpu_used = models.CharField(max_length=40, null=True)

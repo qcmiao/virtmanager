@@ -28,10 +28,11 @@
             <tr>
                 <th>物理机管理IP</th>
                 <th>所在节点</th>
-                <th>CPU剩余(Core)</th>
-                <th>内存剩余(G)</th>
-                <th>磁盘剩余(G)</th>
+                <th>CPU总数/使用/剩余(Core)</th>
+                <th>内存总数/使用/剩余(G)</th>
+                <!--<th>磁盘剩余(G)</th>-->
                 <th>虚机数量</th>
+                <th>IPMI管理地址</th>
                 <th>备注</th>
             </tr>
             </thead>
@@ -45,25 +46,42 @@
                     {% endif %}
                 </td>
                 <td>
+                    {% if info.cpu_max  %}
+                        {{ info.cpu_max }}
+                    {% endif %}/
+                    {% if info.cpu_used  %}
+                        {{ info.cpu_used }}
+                    {% endif %}/
                     {% if info.cpu_remain  %}
-                    {{ info.cpu_remain }}
+                        {{ info.cpu_remain }}
                     {% endif %}
                 </td>
                 <td>
+                    {% if info.mem_max  %}
+                        {{ info.mem_max }}
+                    {% endif %}/
+                    {% if info.mem_used  %}
+                        {{ info.mem_used }}
+                    {% endif %}/
                     {% if info.mem_remain  %}
-                    {{ info.mem_remain }}
+                        {{ info.mem_remain }}
                     {% endif %}
                 </td>
-                <td>
-                    {% if info.disk_remain  %}
-                    {{ info.disk_remain }}
-                    {% endif %}
-                </td>
+                <!--<td>-->
+                    <!--{% if info.disk_remain  %}-->
+                    <!--{{ info.disk_remain }}-->
+                    <!--{% endif %}-->
+                <!--</td>-->
                 <td>
                     {% if info.virtmachine_set.all  %}
                     <a href="/vm_list/{{ info.pk }}/">{{ info.virtmachine_set.all | length }}</a>
                     {% endif %}
 
+                </td>
+                <td>
+                    {% if info.host_ipmiip %}
+                        {{ info.host_ipmiip }}
+                    {% endif %}
                 </td>
 
                 <td>

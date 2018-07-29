@@ -1,14 +1,50 @@
+#!/usr/bin/python
 #coding=utf-8
 import libvirt
 import os
 import sys
 import django
 import threading
+import parmiko
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'virtmanager.settings'
 django.setup()
 from node.models import VirtMachine, HostMachine
+
+class SSHConnection:
+    def __init__(self, host_ip):
+        self.host_ip = host_ip
+        self._connect()
+
+    def _connect(self):
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh_client.connect(hostname=self.host_ip, timeout=10)
+        self.ssh_client = ssh_client
+
+    def exec_command(self, command):
+        if self.ssh_client is None:
+            ssh_client = paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh_client.connect(hostname=self.host_ip, timeout=10)
+            self.ssh_client = ssh_client
+        stdin, stdout, stderr = self.ssh_client.exec_command(command)
+        data = stdout.read()
+        if len(data) > 0:
+            return data.strip()
+
+        err = stderr.read()
+        if len(err) > 0:
+            print err.strip()
+            return data.strip()
+
+        def get_ipmi_ip(self):
+            yuminstall_cmd = 'yum install ipmitool -y'
+            ipmi_ip_get = "ipmitool lan print |grep  -w 'IP Address'|tail -n1|awk {'print $NF'}"
+            resp1 = self.exec_command(yuminstall_cmd)
+            resp2 = self.exec_command(ipmi_ip_get)
+            return resp2
 
 
 class LibvirtClient:
@@ -49,15 +85,16 @@ class LibvirtClient:
 
 
 lock = threading.Lock()
-def update_vm_info(host_list):
 
+
+def update_vm_info(host_list):
     for host in host_list:
         try:
             lock.acquire()
 
             host_ip = host.host_ip
             lib_client = LibvirtClient(host_ip)
-            print lib_client.get_vm_list()
+            ssh_client = SSHConnection(host_ip)
             vm_list = lib_client.get_vm_list()
             cpu_sum = 0
             mem_sum = 0
@@ -78,6 +115,7 @@ def update_vm_info(host_list):
             host.mem_used = mem_sum
             host.cpu_remain = host_info['host_cpu_info'] - cpu_sum
             host.mem_remain = host_info['host_mem_info'] - mem_sum
+            host.host_ipmiip = ssh_client.get_ipmi_ip()
             host.save()
 
             lib_client.close()
