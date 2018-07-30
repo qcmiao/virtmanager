@@ -21,6 +21,10 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.indexviewer, name='index'),
     url(r'^host_list/$', views.hostviewer),
+    url(r'^host_list/(?P<pk>[\d]+)/$', views.hostviewer_detail),
+    url(r'^host-add/$', views.host_add),
+    url(r'^host-del/$', views.host_del),
+
     url(r'^vm_list/$', views.vmviewer),
     url(r'^vm_list/(?P<pk>[\d]+)/$', views.vmviewer_detail),
     url(r'^start-vm/$', views.vm_start),
@@ -29,7 +33,6 @@ urlpatterns = [
     url(r'^suspend-vm/$', views.vm_suspend),
     url(r'^resume-vm/$', views.vm_suspend),
 
-    # url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^login/$', views.LoginView.as_view(), name='login'),
     url(r'^logout/$', views.logout, name='logout'),
 ]

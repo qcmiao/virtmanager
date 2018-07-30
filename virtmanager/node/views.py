@@ -84,6 +84,15 @@ def hostviewer(request):
 
 
 @login_required
+def hostviewer_detail(request,pk):
+    host_id = pk
+    host_ip = HostMachine.objects.get(id = host_id).host_ip
+    vm_info = VirtMachine.objects.filter(host_machine_id=host_id)
+    context = {'vm_info': vm_info, "host_ip": host_ip}
+    return render(request, 'host_list_detail.html', context)
+
+
+@login_required
 def vmviewer(request):
     vm_info_list = VirtMachine.objects.all()
     paginator = Paginator(vm_info_list, 10)  # Show 10 vm per page
@@ -151,6 +160,20 @@ def vm_suspend(request):
     host = HostMachine.objects.get(id=host_id)
     host_ip = host.host_ip
     threading.Thread(target=suspend_vm, args=(host_ip, virt_id)).start()
+    return HttpResponse('success')
+
+@login_required
+def host_add(request):
+    pass
+
+
+@login_required
+def host_del(request):
+    hostid = request.POST.get('id')
+    vm = VirtMachine.objects.filter(host_machine_id=hostid)
+    vm.delete()
+    host = HostMachine.objects.get(id=hostid)
+    host.delete()
     return HttpResponse('success')
 
 

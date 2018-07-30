@@ -5,7 +5,7 @@ import os
 import sys
 import django
 import threading
-import parmiko
+import paramiko
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'virtmanager.settings'
@@ -39,12 +39,12 @@ class SSHConnection:
             print err.strip()
             return data.strip()
 
-        def get_ipmi_ip(self):
-            yuminstall_cmd = 'yum install ipmitool -y'
-            ipmi_ip_get = "ipmitool lan print |grep  -w 'IP Address'|tail -n1|awk {'print $NF'}"
-            resp1 = self.exec_command(yuminstall_cmd)
-            resp2 = self.exec_command(ipmi_ip_get)
-            return resp2
+    def get_ipmi_ip(self):
+        # yuminstall_cmd = 'yum install ipmitool -y'
+        ipmi_ip_get = "ipmitool lan print |grep  -w 'IP Address'|tail -n1|awk {'print $NF'}"
+        # resp1 = self.exec_command(yuminstall_cmd)
+        resp2 = self.exec_command(ipmi_ip_get)
+        return resp2
 
 
 class LibvirtClient:
@@ -91,7 +91,7 @@ def update_vm_info(host_list):
     for host in host_list:
         try:
             lock.acquire()
-
+            # host_ip = '30.207.40.55'
             host_ip = host.host_ip
             lib_client = LibvirtClient(host_ip)
             ssh_client = SSHConnection(host_ip)
