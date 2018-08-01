@@ -25,32 +25,7 @@
         添加物理机
     </button>
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">添加物理机</h4>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal">
-                        <div class="form-group">
-                            <label for="inputHostip" class="col-sm-2 control-label">物理机IP</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="inputHostip" placeholder="HostIp">
-                            </div>
-                        </div>
-                    </form>
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary add_btn">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <div class="panel-body">
@@ -60,12 +35,13 @@
         <table class="table table-bordered table-hover">
             <thead>
             <tr>
-                <th>物理机管理IP</th>
+                <th>物理机名</th>
                 <th>所在节点</th>
+                <th>物理机IP</th>
                 <th>CPU剩余/总数(Core)</th>
                 <th>内存剩余/总数(G)</th>
-                <!--<th>磁盘剩余(G)</th>-->
                 <th>虚机数量</th>
+                <th>序列号</th>
                 <th>IPMI管理地址</th>
                 <th>备注</th>
                 <th>操作</th>
@@ -73,65 +49,83 @@
             </thead>
             <tbody>
             {% for info in host_info %}
-            <tr>
-                <td><a href="/host_list/{{ info.pk }}/">{{ info.host_ip}}</a></td>
-                <td>
-                    {% if info.address  %}
-                    {{ info.address }}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if info.cpu_remain  %}
-                    {{ info.cpu_remain }}
-                    {% endif %}/
-                    {% if info.cpu_max  %}
-                    {{ info.cpu_max }}
-                    {% endif %}
+            <!--<td><a href="/host_list/{{ info.pk }}/">{{ info.host_name}}</a></td>-->
+            <td id="Host_Name">
+                {% if info.host_name %}
+                {{ info.host_name}}
+                {% endif %}
+            </td>
+            <td>
+                {% if info.address %}
+                {{ info.address }}
+                {% endif %}
+            </td>
+            <td id="Host_Ip">
+                {% if info.host_ip %}
+                {{ info.host_ip }}
+                {% endif %}
+            </td>
+            <td>
+                {% if info.cpu_remain  %}
+                {{ info.cpu_remain }}
+                {% endif %}/
+                {% if info.cpu_max %}
+                {{ info.cpu_max }}
+                {% endif %}
 
-                </td>
-                <td>
-                    {% if info.mem_remain  %}
-                    {{ info.mem_remain }}
-                    {% endif %}/
-                    {% if info.mem_max  %}
-                    {{ info.mem_max }}
-                    {% endif %}
+            </td>
+            <td>
+                {% if info.mem_remain %}
+                {{ info.mem_remain }}
+                {% endif %}/
+                {% if info.mem_max  %}
+                {{ info.mem_max }}
+                {% endif %}
 
-                </td>
-                <!--<td>-->
-                <!--{% if info.disk_remain  %}-->
-                <!--{{ info.disk_remain }}-->
-                <!--{% endif %}-->
-                <!--</td>-->
-                <td>
-                    {% if info.virtmachine_set.all  %}
-                    <a href="/vm_list/{{ info.pk }}/">{{ info.virtmachine_set.all | length }}</a>
-                    {% else %}
-                    0
-                    {% endif %}
+            </td>
+            <!--<td>-->
+            <!--{% if info.disk_remain  %}-->
+            <!--{{ info.disk_remain }}-->
+            <!--{% endif %}-->
+            <!--</td>-->
+            <td>
+                {% if info.virtmachine_set.all  %}
+                <a href="/vm_list/{{ info.pk }}/">{{ info.virtmachine_set.all | length }}</a>
+                {% else %}
+                0
+                {% endif %}
 
-                </td>
-                <td>
-                    {% if info.host_ipmiip %}
-                    <a href="http://{{ info.host_ipmiip }}">{{ info.host_ipmiip }}</a>
-                    {% endif %}
-                </td>
+            </td>
+            <td>
+                {% if info.host_sn %}
+                {{ info.host_sn }}
+                {% endif %}
+            </td>
+            <td>
+                {% if info.host_ipmiip %}
+                <a href="http://{{ info.host_ipmiip }}">{{ info.host_ipmiip }}</a>
+                {% endif %}
+            </td>
 
-                <td>
-                    {% if info.description  %}
-                    {{ info.description }}
-                    {% endif %}
-                </td>
-                <td>
-                    <div class="btn-group">
-                        <!--<button type="button" class="btn btn-success edit_btn"> <a href="/host_list/{{ info.pk }}/">编辑</a></button>-->
-                        <button type="button" class="btn btn-success edit_btn" value="{{ info.id}}">编辑</button>
+            <td id="Host_Desc">
+                {% if info.description  %}
+                {{ info.description }}
+                {% endif %}
+            </td>
+            <td>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-whaterver="123" onclick="edititem('{{ info.id }}')">
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                    </button>
+                </div>
 
-                    </div>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-danger delete_btn" value="{{ info.id }}">删除</button>
-                    </div>
-                </td>
+
+                <div class="btn-group">
+                    <button type="button" class="btn  btn-default btn-xs delete_btn" value="{{ info.id }}">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </td>
             </tr>
             {% endfor %}
             </tbody>
@@ -163,6 +157,82 @@
 </div>
 
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加物理机</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="hostIp" class="col-sm-2 control-label">物理机IP</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="hostIp" placeholder="HostIp">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="desc" class="col-sm-2 control-label">备注</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="desc" placeholder="description">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary add_btn">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="editModalLabel">物理机信息</h4>
+            </div>
+            <!--<div class="modal-body">-->
+                <!--<form>-->
+                    <!--<div class="form-group">-->
+                        <!--<label for="edithostip" class="control-label">物理机IP:</label>-->
+                        <!--<input type="text" class="form-control" id="edithostip">-->
+                    <!--</div>-->
+                    <!--<div class="form-group">-->
+                        <!--<label for="editdesc" class="control-label">备注:</label>-->
+                        <!--<input type="text" class="form-control" id="editdesc">-->
+                    <!--</div>-->
+                <!--</form>-->
+            <!--</div>-->
+
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="edithostip" class="control-label">物理机IP:</label>
+                        <input type="text" class="form-control" id="edithostip" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="editdesc" class="control-label">备注:</label>
+                        <input type="text" class="form-control" id="editdesc">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="edititem(this)">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
 <script src="/static/bootstrap-3.3.7-dist/js/jquery.min.js"></script>
 <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
@@ -197,52 +267,26 @@
 <script>
     $(".add_btn").click(function(e) {
         e.preventDefault();
-        var r=confirm("确定添加");
-        if (r==true)
-        {
-            $.ajax({
-                type: "POST",
-                url: "host-add",
-                data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
-                },
-                success: function(result) {
-                    alert('ok');
-                },
-                error: function(result) {
-                    alert('error');
-                }
-            });
-        }
-
+        var hostip = $("#hostIp").val();
+        var desc = $("#desc").val();
+        $.ajax({
+            type: "POST",
+            url: "/host-add/",
+            data: {
+                ip: hostip,
+                description: desc,
+            },
+            success: function(result) {
+                location.reload(true);
+            },
+            error: function(result) {
+                alert('error');
+                location.reload(true);
+            }
+        });
     });
 </script>
 
-<script>
-    $(".edit_btn").click(function(e) {
-        e.preventDefault();
-        // var r=confirm("确定编辑");
-        // if (r==true)
-        {
-            $.ajax({
-                type: "POST",
-                url: "vm_list/(?P<pk>[\\d]+)/",
-                data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
-                },
-                success: function(result) {
-                    alert('ok');
-                },
-                error: function(result) {
-                    alert('error');
-                }
-            });
-        }
-
-    });
-</script>
 
 <script>
     $(".delete_btn").click(function(e) {
@@ -258,15 +302,94 @@
                     // access_token: $("#access_token").val()
                 },
                 success: function(result) {
-                    alert('ok');
+                    // alert('ok');
+                    location.reload(true);
                 },
                 error: function(result) {
                     alert('error');
+                    location.reload(true);
                 }
             });
         }
 
     });
+</script>
+
+<!--<script>-->
+    <!--$("editModal").modal("hide");-->
+    <!--function edititem(obj){-->
+        <!--console.log(obj)-->
+        <!--$('#edithostip').val(obj);-->
+        <!--$('#editdesc').val(obj);-->
+        <!--// $('#editModal').modal('show');-->
+    <!--}-->
+<!--</script>-->
+
+<script>
+    $('#editModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('whatever') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        modal.find('.modal-title').text('New message to11 ' + recipient)
+        modal.find('.modal-body input').val(recipient)
+    })
+</script>
+
+<!--<script>-->
+    <!--function edititem(obj){-->
+        <!--console.log(obj)-->
+        <!--var tr=$(obj).parent().parent();-->
+        <!--var hostip_obj = tr.children("td#Host_Ip").text();-->
+        <!--var desc_obj = tr.children("td#Host_Desc").text();-->
+        <!--$('#edithostip').val(hostip_obj);-->
+        <!--$('#editdesc').val(desc_obj);-->
+        <!--$('#editModal').modal('show');-->
+    <!--}-->
+<!--</script>-->
+
+
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@fat1">Open modal for @fat</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">Open modal for @getbootstrap</button>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">Recipient:</label>
+                        <input type="text" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="control-label">Message:</label>
+                        <textarea class="form-control" id="message-text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Send message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#exampleModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('whatever')
+        var modal = $(this)
+        modal.find('.modal-title').text('New message to ' + recipient)
+        modal.find('.modal-body input').val(recipient)
+    })
 </script>
 </body>
 </html>

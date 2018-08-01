@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.indexviewer, name='index'),
     url(r'^host_list/$', views.hostviewer),
-    url(r'^host_list/(?P<pk>[\d]+)/$', views.hostviewer_detail),
+    url(r'^host_list/?id=(?P<pk>[\d]+)$', views.hostviewer_detail),
     url(r'^host-add/$', views.host_add),
     url(r'^host-del/$', views.host_del),
 

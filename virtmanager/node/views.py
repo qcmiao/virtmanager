@@ -71,7 +71,7 @@ def logout(request):
 
 @login_required
 def hostviewer(request):
-    host_info_list = HostMachine.objects.all()
+    host_info_list = HostMachine.objects.all().order_by('-id')
     paginator = Paginator(host_info_list, 10)  # Show 10 host per page
     page = request.GET.get('page')
     try:
@@ -164,8 +164,10 @@ def vm_suspend(request):
 
 @login_required
 def host_add(request):
-    pass
-
+    hostip = request.POST.get('ip')
+    description = request.POST.get('description')
+    HostMachine.objects.create(host_ip=hostip, description=description)
+    return HttpResponse('success')
 
 @login_required
 def host_del(request):
