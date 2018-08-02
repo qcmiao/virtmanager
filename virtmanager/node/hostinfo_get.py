@@ -114,13 +114,37 @@ class LibvirtClient:
         vm_status = vm_info.state()[0]
         vm_cpu_info = vm_info.info()[3]
         vm_mem_info = vm_info.info()[2]/1024/1000
-        return {'vm_status': vm_status, 'vm_cpu_info': vm_cpu_info, 'vm_mem_info': vm_mem_info}
+        return {'vm_status': vm_status,
+                'vm_cpu_info': vm_cpu_info,
+                'vm_mem_info': vm_mem_info
+        }
 
     def get_host_info(self):
         host_info = self.conn.getInfo()
         host_cpu_info = host_info[2]
         host_mem_info = host_info[1]/1000
-        return {'host_cpu_info': host_cpu_info, 'host_mem_info': host_mem_info}
+        return {'host_cpu_info': host_cpu_info,
+                'host_mem_info': host_mem_info
+        }
+
+    def get_pool_info(self, poolname='vmdata'):
+        try:
+            pool = self.conn.storagePoolLookupByName(poolname)
+            pool_info = pool.info()
+            pool_capacity = pool_info[1]/1024**3
+            pool_allocation = pool_info[2]/1024**3
+            pool_available = pool_info[3]/1024**3
+        except Exception, e:
+            print e
+        return {
+            'pool_capacity': pool_capacity,
+            'pool_allocation': pool_allocation,
+            'pool_available': pool_available
+        }
+
+
+
+
 
     def close(self):
         self.conn.close()
@@ -160,6 +184,10 @@ def update_vm_info(host):
         host.host_sn = ssh_client.get_sn()
         host.host_brand = ssh_client.get_brand()
         host.host_pid = ssh_client.get_host_pid()
+        pool_info = lib_client.get_pool_info()
+        host.pool_capacity = pool_info['pool_capacity']
+        host.pool_allocation = pool_info['pool_allocation']
+        host.pool_available = pool_info['pool_available']
         host.save()
         lib_client.close()
     except Exception, e:

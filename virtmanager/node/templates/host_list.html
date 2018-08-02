@@ -40,6 +40,7 @@
                 <th>物理机IP</th>
                 <th>CPU剩余/总数(Core)</th>
                 <th>内存剩余/总数(G)</th>
+                <th>磁盘剩余/总数(GiB)</th>
                 <th>虚机数量</th>
                 <th>序列号</th>
                 <th>IPMI管理地址</th>
@@ -83,11 +84,14 @@
                 {% endif %}
 
             </td>
-            <!--<td>-->
-            <!--{% if info.disk_remain  %}-->
-            <!--{{ info.disk_remain }}-->
-            <!--{% endif %}-->
-            <!--</td>-->
+            <td>
+            {% if info.pool_available  %}
+            {{ info.pool_available }}
+            {% endif %}/
+            {% if info.pool_capacity  %}
+            {{ info.pool_capacity }}
+            {% endif %}
+            </td>
             <td>
                 {% if info.virtmachine_set.all  %}
                 <a href="/vm_list/{{ info.pk }}/">{{ info.virtmachine_set.all | length }}</a>
