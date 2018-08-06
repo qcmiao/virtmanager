@@ -51,7 +51,7 @@ class SwitchPort(BaseModel):
 
 class HostNet(BaseModel):
     host_machine = models.ForeignKey('HostMachine')
-    iface_switch_port = models.ForeignKey('SwitchPort')
+    iface_switch_port = models.ForeignKey('SwitchPort', null=True)
     iface_name = models.CharField(max_length=40, null=True)
     iface_mac = models.CharField(max_length=40, null=True)
     iface_ip = models.CharField(max_length=40, null=True)
@@ -70,6 +70,7 @@ class VmNet(BaseModel):
     virt_machine = models.ForeignKey('VirtMachine')
     bridge_net = models.ForeignKey('BridgeNet')
     net_name= models.CharField(max_length=40, null=True)
+    vnet_name = models.CharField(max_length=40, null=True)
     net_mac = models.CharField(max_length=40, null=True)
     net_ip = models.CharField(max_length=40, null=True)
     net_prefix = models.CharField(max_length=40, null=True)

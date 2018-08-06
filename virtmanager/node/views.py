@@ -164,7 +164,7 @@ def vm_suspend(request):
 
 @login_required
 def host_add(request):
-    hostip = request.POST.get('ip')
+    hostip = request.POST.get('ip').strip()
     description = request.POST.get('description')
     HostMachine.objects.create(host_ip=hostip, description=description)
     return HttpResponse('success')

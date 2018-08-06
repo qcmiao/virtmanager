@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load node_tags %}
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
@@ -30,6 +31,7 @@
         <table class="table table-bordered table-hover">
             <thead>
             <tr>
+                <th>序号</th>
                 <th>虚机ID</th>
                 <th>公网IP</th>
                 <th>内网IP</th>
@@ -44,6 +46,9 @@
             <tbody>
             {% for info in vm_info %}
             <tr>
+                <td>
+                    {{ forloop.counter|counter:vm_info.number }}
+                </td>
                 <td>{{ info.vm_id }}</td>
                 <td>
                     {% if info.ext_ip  %}

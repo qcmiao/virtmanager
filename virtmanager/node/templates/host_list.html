@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load node_tags %}
+
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
@@ -35,6 +37,7 @@
         <table class="table table-bordered table-hover">
             <thead>
             <tr>
+                <th>序号</th>
                 <th>物理机名</th>
                 <th>所在节点</th>
                 <th>物理机IP</th>
@@ -51,6 +54,9 @@
             <tbody>
             {% for info in host_info %}
             <!--<td><a href="/host_list/{{ info.pk }}/">{{ info.host_name}}</a></td>-->
+            <td>
+                {{ forloop.counter|counter:host_info.number }}
+            </td>
             <td id="Host_Name">
                 {% if info.host_name %}
                 {{ info.host_name}}
@@ -134,6 +140,7 @@
             {% endfor %}
             </tbody>
         </table>
+
         <nav aria-label="Page navigation">
             <ul class="pager">
                 <li>

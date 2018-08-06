@@ -11,7 +11,7 @@ import paramiko
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'virtmanager.settings'
 django.setup()
-from node.models import VirtMachine, HostMachine
+from node.models import VirtMachine, HostMachine, HostNet, BridgeNet, VmNet, Switch, SwitchPort
 
 
 class SSHConnection:
@@ -47,23 +47,19 @@ class SSHConnection:
         return ipmi_ip
 
     def get_sn(self):
-        sn_get = "dmidecode  -t system|grep 'Serial Number:'|awk {'print $3'}"
+        sn_get = "dmidecode -t system|grep 'Serial Number:'|awk {'print $3'}"
         sn = self.exec_command(sn_get)
         return sn
 
     def get_brand(self):
-        brand_get = "dmidecode  -t system|grep 'Manufacturer:'|awk {'print $2'}"
+        brand_get = "dmidecode -t system|grep 'Manufacturer:'|awk {'print $2'}"
         brand  = self.exec_command(brand_get)
         return brand
 
     def get_host_pid(self):
-        host_pid_get = "dmidecode  -t system|grep 'Product Name:'|awk {'print $3'}"
+        host_pid_get = "dmidecode -t system|grep 'Product Name:'|awk {'print $3'}"
         host_pid = self.exec_command(host_pid_get)
         return host_pid
-
-
-
-
 
 
 class LibvirtClient:
@@ -97,16 +93,14 @@ class LibvirtClient:
         try:
             host_address = address_dic[address_temp]
         except Exception, e:
-            print e
+            print e, "has no match address"
             host_address = ""
         return host_address
 
     def get_vm_list(self):
         vm_obj_list = self.conn.listAllDomains()
         vm_list = []
-        for vm in vm_obj_list:
-            vm_name = vm.name()
-            vm_list.append(vm_name)
+        vm_list = [i.name() for i in vm_obj_list]
         return vm_list
 
     def get_vm_info(self, vm_id):
@@ -142,9 +136,20 @@ class LibvirtClient:
             'pool_available': pool_available
         }
 
+    def get_host_iface(self):
+        iface_obj_list = self.conn.listAllInterfaces()
+        iface_list = []
+        iface_list = [i.name() for i in iface_obj_list if i.name() != 'lo']
+        return iface_list
 
-
-
+    def get_hostiface_info(self, iface_name):
+        hostiface_info = self.conn.interfaceLookupByName(iface_name)
+        hostiface_mac = hostiface_info.MACString()
+        hostiface_xml = hostiface_info.XMLDesc(0)
+        return {
+            "hostiface_mac": hostiface_mac,
+            "hostiface_xml": hostiface_xml
+        }
 
     def close(self):
         self.conn.close()
@@ -157,8 +162,20 @@ def update_vm_info(host):
     lock.acquire()
     try:
         host_ip = host.host_ip
-        lib_client = LibvirtClient(host_ip)
+        print host_ip
         ssh_client = SSHConnection(host_ip)
+        host.host_ipmiip = ssh_client.get_ipmi_ip()
+        host.host_sn = ssh_client.get_sn()
+        host.host_brand = ssh_client.get_brand()
+        host.host_pid = ssh_client.get_host_pid()
+        lib_client = LibvirtClient(host_ip)
+        hostnet_list = lib_client.get_host_iface()
+        for iface_name in hostnet_list:
+            iface, created = HostNet.objects.get_or_create(iface_name=iface_name, host_machine=host)
+            hostiface_info = lib_client.get_hostiface_info(iface_name)
+            iface.iface_mac = hostiface_info['hostiface_mac']
+            iface.save()
+
         vm_list = lib_client.get_vm_list()
         cpu_sum = 0
         mem_sum = 0
@@ -180,39 +197,25 @@ def update_vm_info(host):
         host.mem_remain = host_info['host_mem_info'] - mem_sum
         host.host_name = lib_client.get_hostname()
         host.address = lib_client.get_address()
-        host.host_ipmiip = ssh_client.get_ipmi_ip()
-        host.host_sn = ssh_client.get_sn()
-        host.host_brand = ssh_client.get_brand()
-        host.host_pid = ssh_client.get_host_pid()
         pool_info = lib_client.get_pool_info()
         host.pool_capacity = pool_info['pool_capacity']
         host.pool_allocation = pool_info['pool_allocation']
         host.pool_available = pool_info['pool_available']
         host.save()
         lib_client.close()
-    except Exception, e:
-        print e
+
+    except :
+        host.save()
     lock.release()
 
 
 if __name__ == '__main__':
     host_list = HostMachine.objects.all()
-    pool = multiprocessing.Pool(4)
+    pools = multiprocessing.Pool(4)
     for h in host_list:
-        pool.apply_async(update_vm_info, (h,))
-    pool.close()
-    pool.join()
+        pools.apply_async(update_vm_info, (h,))
+    pools.close()
+    pools.join()
 
-    # thread_count = 10
-    # threads = []
-    # for i in xrange(thread_count):
-    #     sum_hosts = host_list[i::thread_count]
-    #     if sum_hosts is not None:
-    #         t = threading.Thread(target=update_vm_info, args=(sum_hosts, ))
-    #         threads.append(t)
-    #
-    # print threads
-    # for t in threads:
-    #     t.start()
 
 
