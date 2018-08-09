@@ -33,8 +33,8 @@
             <tr>
                 <th>序号</th>
                 <th>虚机ID</th>
-                <th>公网IP</th>
-                <th>内网IP</th>
+                <th>网卡1</th>
+                <th>网卡2</th>
                 <th>物理机IP</th>
                 <th>状态</th>
                 <th>CPU(Core)</th>
@@ -51,14 +51,14 @@
                 </td>
                 <td>{{ info.vm_id }}</td>
                 <td>
-                    {% if info.ext_ip  %}
-                    {{ info.ext_ip }}
-                    {% endif %}
+                    <!--{% if info.ext_ip  %}-->
+                    <!--{{ info.ext_ip }}-->
+                    <!--{% endif %}-->
                 </td>
                 <td>
-                    {% if info.int_ip  %}
-                    {{ info.int_ip }}
-                    {% endif %}
+                    <!--{% if info.int_ip  %}-->
+                    <!--{{ info.int_ip }}-->
+                    <!--{% endif %}-->
                 </td>
                 <td>{{ info.host_machine.host_ip }}</td>
                 <td>

@@ -7,6 +7,7 @@ import django
 import threading
 import multiprocessing
 import paramiko
+from xml.etree import ElementTree as ET
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'virtmanager.settings'
@@ -53,7 +54,7 @@ class SSHConnection:
 
     def get_brand(self):
         brand_get = "dmidecode -t system|grep 'Manufacturer:'|awk {'print $2'}"
-        brand  = self.exec_command(brand_get)
+        brand = self.exec_command(brand_get)
         return brand
 
     def get_host_pid(self):
@@ -108,9 +109,19 @@ class LibvirtClient:
         vm_status = vm_info.state()[0]
         vm_cpu_info = vm_info.info()[3]
         vm_mem_info = vm_info.info()[2]/1024/1000
+        vm_xml = vm_info.XMLDesc(0)
+        xe = ET.fromstring(vm_xml)
+        try:
+            vm_net_info = vm_info.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT, 0)
+        except:
+            print vm_id, 'no agent'
+            vm_net_info = {}
+            pass
         return {'vm_status': vm_status,
                 'vm_cpu_info': vm_cpu_info,
-                'vm_mem_info': vm_mem_info
+                'vm_mem_info': vm_mem_info,
+                'vm_xe': xe,
+                'vm_net_info': vm_net_info
         }
 
     def get_host_info(self):
@@ -121,13 +132,22 @@ class LibvirtClient:
                 'host_mem_info': host_mem_info
         }
 
+
+
     def get_pool_info(self, poolname='vmdata'):
         try:
-            pool = self.conn.storagePoolLookupByName(poolname)
-            pool_info = pool.info()
-            pool_capacity = pool_info[1]/1024**3
-            pool_allocation = pool_info[2]/1024**3
-            pool_available = pool_info[3]/1024**3
+            pool_list =self.conn.listStoragePools()
+            if poolname in pool_list:
+                pool = self.conn.storagePoolLookupByName(poolname)
+                pool_info = pool.info()
+                pool_capacity = pool_info[1]/1024**3
+                pool_allocation = pool_info[2]/1024**3
+                pool_available = pool_info[3]/1024**3
+            else:
+                print "storage info get error: 'no poolname is {}'".format(poolname)
+                pool_capacity = ""
+                pool_allocation = ""
+                pool_available = ""
         except Exception, e:
             print e
         return {
@@ -137,10 +157,10 @@ class LibvirtClient:
         }
 
     def get_host_iface(self):
-        iface_obj_list = self.conn.listAllInterfaces()
-        iface_list = []
-        iface_list = [i.name() for i in iface_obj_list if i.name() != 'lo']
-        return iface_list
+        host_iface_obj_list = self.conn.listAllInterfaces()
+        host_iface_list = []
+        host_iface_list = [i.name() for i in host_iface_obj_list if i.name() != 'lo']
+        return host_iface_list
 
     def get_hostiface_info(self, iface_name):
         hostiface_info = self.conn.interfaceLookupByName(iface_name)
@@ -150,6 +170,13 @@ class LibvirtClient:
             "hostiface_mac": hostiface_mac,
             "hostiface_xml": hostiface_xml
         }
+
+
+
+
+    def get_bridge_iface(self):
+        pass
+        return bridge_iface_list
 
     def close(self):
         self.conn.close()
@@ -171,23 +198,62 @@ def update_vm_info(host):
         lib_client = LibvirtClient(host_ip)
         hostnet_list = lib_client.get_host_iface()
         for iface_name in hostnet_list:
-            iface, created = HostNet.objects.get_or_create(iface_name=iface_name, host_machine=host)
+            iface_obj, created = HostNet.objects.get_or_create(iface_name=iface_name, host_machine=host)
             hostiface_info = lib_client.get_hostiface_info(iface_name)
-            iface.iface_mac = hostiface_info['hostiface_mac']
-            iface.save()
+            iface_obj.iface_mac = hostiface_info['hostiface_mac']
+            print '1'
+            bridge_obj, created = BridgeNet.objects.get_or_create(bridge_name=iface_name, host_net=iface_obj)
+            print '2'
+            iface_obj.save()
+            bridge_obj.save()
 
         vm_list = lib_client.get_vm_list()
         cpu_sum = 0
         mem_sum = 0
         for vm_id in vm_list:
-            vm, created = VirtMachine.objects.get_or_create(vm_id=vm_id, host_machine=host)
+            vm_obj, created = VirtMachine.objects.get_or_create(vm_id=vm_id, host_machine=host)
             vm_info = lib_client.get_vm_info(vm_id)
-            vm.vm_status = vm_info['vm_status']
-            vm.cpu_num = vm_info['vm_cpu_info']
-            vm.mem_num = vm_info['vm_mem_info']
+            vm_obj.vm_status = vm_info['vm_status']
+            vm_obj.cpu_num = vm_info['vm_cpu_info']
+            vm_obj.mem_num = vm_info['vm_mem_info']
             cpu_sum += vm_info['vm_cpu_info']
             mem_sum += vm_info['vm_mem_info']
-            vm.save()
+
+            vm_net_obj = vm_info['vm_net_info']
+            vm_iface_name_list = []
+            vm_iface_mac_list = []
+            vm_iface_ip_list = []
+            vm_iface_prefix_list = []
+            for vm_iface_name,vm_iface_info in vm_net_obj.items():
+                if vm_iface_name != "lo":
+                    vm_iface_name_list.append(vm_iface_name)
+                    vm_iface_mac_list.append(vm_iface_info['hwaddr'])
+                    vm_iface_ip_list.append(vm_iface_info['addrs'][0]['addr'])
+                    vm_iface_prefix_list.append(vm_iface_info['addrs'][0]['prefix'])
+                else:
+                    pass
+            print vm_iface_name_list, vm_iface_mac_list, vm_iface_ip_list
+            vm_xe =vm_info['vm_xe']
+            for vnet_xml in vm_xe.findall('.//devices/interface'):
+                try:
+                    vnet_name = vnet_xml.find('target').get('dev')
+                except:
+                    vnet_name = 'unknown'
+                finally:
+                    vnet_mac = vnet_xml.find('mac').get('address')
+                    bridge_name = vnet_xml.find('source').get('bridge')
+                    vnet_obj, created = VmNet.objects.get_or_create(net_mac=vnet_mac, virt_machine=vm_obj)
+                    vnet_obj.vnet_name = vnet_name
+                    vnet_obj.host_net = iface_obj
+                    vnet_obj.bridge_name = bridge_name
+                    if vnet_mac in vm_iface_mac_list:
+                        ip_index = vm_iface_mac_list.index(vnet_mac)
+                        vnet_obj.net_ip = vm_iface_ip_list[ip_index]
+                        vnet_obj.net_name = vm_iface_name_list[ip_index]
+                        vnet_obj.net_prefix = vm_iface_prefix_list[ip_index]
+
+                    vnet_obj.save()
+            vm_obj.save()
         host_info = lib_client.get_host_info()
         host.cpu_max = host_info['host_cpu_info']
         host.mem_max = host_info['host_mem_info']
@@ -203,9 +269,10 @@ def update_vm_info(host):
         host.pool_available = pool_info['pool_available']
         host.save()
         lib_client.close()
-
+        print 'ok'
     except :
         host.save()
+        print 'exit'
     lock.release()
 
 

@@ -25,6 +25,7 @@ class HostMachine(BaseModel):
     pool_available = models.CharField(max_length=40, null=True)
     description = models.CharField(max_length=200, null=True)
 
+
 class VirtMachine(BaseModel):
     int_ip = models.CharField(max_length=40, null=True)
     ext_ip = models.CharField(max_length=40, null=True)
@@ -68,13 +69,13 @@ class BridgeNet(BaseModel):
 
 class VmNet(BaseModel):
     virt_machine = models.ForeignKey('VirtMachine')
-    bridge_net = models.ForeignKey('BridgeNet')
+    bridge_net = models.ForeignKey('BridgeNet', null=True)
     net_name= models.CharField(max_length=40, null=True)
     vnet_name = models.CharField(max_length=40, null=True)
+    bridge_name = models.CharField(max_length=40, null=True)
     net_mac = models.CharField(max_length=40, null=True)
     net_ip = models.CharField(max_length=40, null=True)
     net_prefix = models.CharField(max_length=40, null=True)
     net_purpose = models.CharField(max_length=40, null=True)
-    iface = models.CharField(max_length=40, null=True)
 
 
