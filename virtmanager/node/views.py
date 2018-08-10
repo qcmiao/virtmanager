@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, get_object_or_404
-from node.models import VirtMachine, HostMachine
+from node.models import VirtMachine, HostMachine, VmNet, BridgeNet, HostNet, Switch, SwitchPort, HostnameRules, VmnameRules
 from .vm_ctl import start_vm, reboot_vm, destroy_vm, suspend_vm
 from django.http import HttpResponse
 import threading
@@ -70,6 +70,16 @@ def logout(request):
 
 
 @login_required
+def hostname_conf(request):
+    hostname_info = HostnameRules.objects.all().order_by('-id')
+    return render(request, 'hostname_conf.html', {'hostname_info': hostname_info})
+
+@login_required
+def vmname_conf(request):
+    vmname_info = VmnameRules.objects.all().order_by('-id')
+    return render(request, 'vmname_conf.html', {'vmname_info': vmname_info})
+
+@login_required
 def hostviewer(request):
     host_info_list = HostMachine.objects.all().order_by('-id')
     paginator = Paginator(host_info_list, 10)  # Show 10 host per page
@@ -94,24 +104,27 @@ def hostviewer_detail(request,pk):
 
 @login_required
 def vmviewer(request):
-    vm_info_list = VirtMachine.objects.all()
+    vm_info_list = VirtMachine.objects.all().order_by('-host_machine_id')
+    vmnet_info = VmNet.objects.all()
     paginator = Paginator(vm_info_list, 10)  # Show 10 vm per page
     page = request.GET.get('page')
     try:
         vm_info = paginator.page(page)
+
     except PageNotAnInteger:
         vm_info = paginator.page(1)
     except EmptyPage:
         vm_info = paginator.page(paginator.num_pages)
-    return render(request, 'vm_list.html', {'vm_info': vm_info})
+    return render(request, 'vm_list.html', {'vm_info': vm_info, 'vmnet_info': vmnet_info})
 
 
 @login_required
-def vmviewer_detail(request,pk):
+def vmviewer_detail(request, pk):
     host_id = pk
     host_ip = HostMachine.objects.get(id = host_id).host_ip
     vm_info = VirtMachine.objects.filter(host_machine_id=host_id)
-    context = {'vm_info': vm_info, "host_ip": host_ip}
+    vmnet_info = VmNet.objects.all()
+    context = {'vm_info': vm_info, "host_ip": host_ip, 'vmnet_info':vmnet_info}
     return render(request, 'vm_list_detail.html', context)
 
 
@@ -177,5 +190,7 @@ def host_del(request):
     host = HostMachine.objects.get(id=hostid)
     host.delete()
     return HttpResponse('success')
+
+
 
 

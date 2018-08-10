@@ -11,30 +11,27 @@
     <!-- Bootstrap -->
     <link href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 
+
 </head>
 <body>
 {% include "header.html" %}
-
-
 <div class="panel panel-default">
     <!-- Default panel contents -->
-
     <div class="panel-heading">
         <h3>
             虚机列表
-            {% if host_ip %}
-            ({{ host_ip }})
-            {% endif %}
+            <!--{% if host_ip %}-->
+            <!--({{ host_ip }})-->
+            <!--{% endif %}-->
         </h3>
     </div>
     <div class="panel-body">
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover table-condensed">
             <thead>
             <tr>
                 <th>序号</th>
                 <th>虚机ID</th>
-                <th>网卡1</th>
-                <th>网卡2</th>
+                <th>网卡信息</th>
                 <th>物理机IP</th>
                 <th>状态</th>
                 <th>CPU(Core)</th>
@@ -45,22 +42,30 @@
             </thead>
             <tbody>
             {% for info in vm_info %}
-            <tr>
-                <td>
+            <tr valign="middle">
+                <td >
                     {{ forloop.counter|counter:vm_info.number }}
                 </td>
-                <td>{{ info.vm_id }}</td>
+                <td >
+                    {{ info.vm_id }}
+                </td>
+
                 <td>
-                    <!--{% if info.ext_ip  %}-->
-                    <!--{{ info.ext_ip }}-->
-                    <!--{% endif %}-->
+                    <dl class="dl-horizontal">
+                        {% for vmnet_obj in vmnet_info %}
+                        {% if vmnet_obj.virt_machine_id == info.id %}
+                        <dt>Name:   {{ vmnet_obj.net_name }}</dt>
+                        <dd>Ip: {{ vmnet_obj.net_ip }}</dd>
+                        <dd>VmMac:    {{ vmnet_obj.net_mac }}</dd>
+                        <dd>HostMac:    {{ vmnet_obj.bridge_mac }}</dd>
+                        {% endif %}
+                        {% endfor %}
+
+                    </dl>
                 </td>
                 <td>
-                    <!--{% if info.int_ip  %}-->
-                    <!--{{ info.int_ip }}-->
-                    <!--{% endif %}-->
+                    {{ info.host_machine.host_ip }}
                 </td>
-                <td>{{ info.host_machine.host_ip }}</td>
                 <td>
                     {% if info.vm_status == '1' %}
                         运行中
@@ -288,7 +293,5 @@
         }
     });
 </script>
-
-
 </body>
 </html>

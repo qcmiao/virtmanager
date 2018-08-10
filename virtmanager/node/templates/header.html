@@ -1,5 +1,4 @@
 
-
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -18,6 +17,14 @@
       <ul class="nav navbar-nav">
         <li><a href="/host_list">物理机<span class="sr-only">(current)</span></a></li>
         <li><a href="/vm_list">虚拟机</a></li>
+        <li role="presentation" class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">配置<span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/hostname_conf">主机对应机房</a></li>
+            <li><a href="/vmname_conf">虚机对应业务</a></li>
+          </ul>
+        </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
@@ -31,4 +38,7 @@
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
+
+
+
 

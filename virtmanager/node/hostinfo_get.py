@@ -8,7 +8,6 @@ import threading
 import multiprocessing
 import paramiko
 from xml.etree import ElementTree as ET
-
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "."))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'virtmanager.settings'
 django.setup()
@@ -128,7 +127,8 @@ class LibvirtClient:
         host_info = self.conn.getInfo()
         host_cpu_info = host_info[2]
         host_mem_info = host_info[1]/1000
-        return {'host_cpu_info': host_cpu_info,
+        return {
+                'host_cpu_info': host_cpu_info,
                 'host_mem_info': host_mem_info
         }
 
@@ -167,16 +167,9 @@ class LibvirtClient:
         hostiface_mac = hostiface_info.MACString()
         hostiface_xml = hostiface_info.XMLDesc(0)
         return {
-            "hostiface_mac": hostiface_mac,
-            "hostiface_xml": hostiface_xml
+                "hostiface_mac": hostiface_mac,
+                "hostiface_xml": hostiface_xml
         }
-
-
-
-
-    def get_bridge_iface(self):
-        pass
-        return bridge_iface_list
 
     def close(self):
         self.conn.close()
@@ -189,7 +182,6 @@ def update_vm_info(host):
     lock.acquire()
     try:
         host_ip = host.host_ip
-        print host_ip
         ssh_client = SSHConnection(host_ip)
         host.host_ipmiip = ssh_client.get_ipmi_ip()
         host.host_sn = ssh_client.get_sn()
@@ -197,15 +189,16 @@ def update_vm_info(host):
         host.host_pid = ssh_client.get_host_pid()
         lib_client = LibvirtClient(host_ip)
         hostnet_list = lib_client.get_host_iface()
+        bri_mac_list = []
         for iface_name in hostnet_list:
             iface_obj, created = HostNet.objects.get_or_create(iface_name=iface_name, host_machine=host)
             hostiface_info = lib_client.get_hostiface_info(iface_name)
             iface_obj.iface_mac = hostiface_info['hostiface_mac']
-            print '1'
             bridge_obj, created = BridgeNet.objects.get_or_create(bridge_name=iface_name, host_net=iface_obj)
-            print '2'
-            iface_obj.save()
-            bridge_obj.save()
+            bri_mac_list.append((iface_name, iface_obj.iface_mac))
+        bri_mac_dic = {bridge: mac for (bridge, mac) in bri_mac_list}
+        iface_obj.save()
+        bridge_obj.save()
 
         vm_list = lib_client.get_vm_list()
         cpu_sum = 0
@@ -224,7 +217,7 @@ def update_vm_info(host):
             vm_iface_mac_list = []
             vm_iface_ip_list = []
             vm_iface_prefix_list = []
-            for vm_iface_name,vm_iface_info in vm_net_obj.items():
+            for vm_iface_name, vm_iface_info in vm_net_obj.items():
                 if vm_iface_name != "lo":
                     vm_iface_name_list.append(vm_iface_name)
                     vm_iface_mac_list.append(vm_iface_info['hwaddr'])
@@ -232,7 +225,6 @@ def update_vm_info(host):
                     vm_iface_prefix_list.append(vm_iface_info['addrs'][0]['prefix'])
                 else:
                     pass
-            print vm_iface_name_list, vm_iface_mac_list, vm_iface_ip_list
             vm_xe =vm_info['vm_xe']
             for vnet_xml in vm_xe.findall('.//devices/interface'):
                 try:
@@ -246,12 +238,15 @@ def update_vm_info(host):
                     vnet_obj.vnet_name = vnet_name
                     vnet_obj.host_net = iface_obj
                     vnet_obj.bridge_name = bridge_name
+                    if bridge_name in bri_mac_dic.keys():
+                        vnet_obj.bridge_mac = bri_mac_dic[bridge_name]
+                    else:
+                        pass
                     if vnet_mac in vm_iface_mac_list:
                         ip_index = vm_iface_mac_list.index(vnet_mac)
                         vnet_obj.net_ip = vm_iface_ip_list[ip_index]
                         vnet_obj.net_name = vm_iface_name_list[ip_index]
                         vnet_obj.net_prefix = vm_iface_prefix_list[ip_index]
-
                     vnet_obj.save()
             vm_obj.save()
         host_info = lib_client.get_host_info()
@@ -269,15 +264,21 @@ def update_vm_info(host):
         host.pool_available = pool_info['pool_available']
         host.save()
         lib_client.close()
+        print host_ip
         print 'ok'
-    except :
+        print '####result######'
+    except:
         host.save()
-        print 'exit'
+        print host_ip
+        print 'error'
+        print '####result######'
+
     lock.release()
 
 
 if __name__ == '__main__':
     host_list = HostMachine.objects.all()
+    # host_list = HostMachine.objects.filter(host_ip='30.207.40.25')
     pools = multiprocessing.Pool(4)
     for h in host_list:
         pools.apply_async(update_vm_info, (h,))

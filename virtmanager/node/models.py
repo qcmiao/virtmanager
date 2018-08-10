@@ -7,7 +7,7 @@ from common.models import BaseModel
 # Create your models here.
 
 class HostMachine(BaseModel):
-    host_ip = models.CharField(max_length=40)
+    host_ip = models.CharField(max_length=40, unique=True)
     host_ipmiip = models.CharField(max_length=40, null=True)
     host_name = models.CharField(max_length=40, null=True)
     host_sn = models.CharField(max_length=40, null=True)
@@ -27,8 +27,6 @@ class HostMachine(BaseModel):
 
 
 class VirtMachine(BaseModel):
-    int_ip = models.CharField(max_length=40, null=True)
-    ext_ip = models.CharField(max_length=40, null=True)
     vm_id = models.CharField(max_length=40)
     vm_status = models.CharField(max_length=40, null=True)
     cpu_num = models.CharField(max_length=40, null=True)
@@ -70,12 +68,21 @@ class BridgeNet(BaseModel):
 class VmNet(BaseModel):
     virt_machine = models.ForeignKey('VirtMachine')
     bridge_net = models.ForeignKey('BridgeNet', null=True)
+    bridge_name = models.CharField(max_length=40, null=True)
+    bridge_mac = models.CharField(max_length=40, null=True)
     net_name= models.CharField(max_length=40, null=True)
     vnet_name = models.CharField(max_length=40, null=True)
-    bridge_name = models.CharField(max_length=40, null=True)
     net_mac = models.CharField(max_length=40, null=True)
     net_ip = models.CharField(max_length=40, null=True)
     net_prefix = models.CharField(max_length=40, null=True)
     net_purpose = models.CharField(max_length=40, null=True)
+
+class HostnameRules(BaseModel):
+    hostname_rules = models.CharField(max_length=40, null=True)
+    address = models.CharField(max_length=40, null=True)
+
+class VmnameRules(BaseModel):
+    vmname_rules = models.CharField(max_length=40, null=True)
+    bussiness = models.CharField(max_length=40, null=True)
 
 
