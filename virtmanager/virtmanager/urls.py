@@ -37,6 +37,10 @@ urlpatterns = [
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^hostname_conf/$', views.hostname_conf),
     url(r'^vmname_conf/$', views.vmname_conf),
+    url(r'^hostrules-add/$', views.hostrules_add),
+    url(r'^hostrules-del/$', views.hostrules_del),
+    url(r'^vmrules-add/$', views.vmrules_add),
+    url(r'^vmrules-del/$', views.vmrules_del),
 
 ]
 

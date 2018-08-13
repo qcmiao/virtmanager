@@ -6,6 +6,7 @@ from common.models import BaseModel
 
 # Create your models here.
 
+
 class HostMachine(BaseModel):
     host_ip = models.CharField(max_length=40, unique=True)
     host_ipmiip = models.CharField(max_length=40, null=True)
@@ -13,7 +14,7 @@ class HostMachine(BaseModel):
     host_sn = models.CharField(max_length=40, null=True)
     host_brand = models.CharField(max_length=40, null=True)
     host_pid = models.CharField(max_length=40, null=True)
-    address = models.CharField(max_length=40, null=True)
+    # address = models.CharField(max_length=40, null=True)
     cpu_max = models.CharField(max_length=40, null=True)
     cpu_used = models.CharField(max_length=40, null=True)
     cpu_remain = models.CharField(max_length=40, null=True)
@@ -77,12 +78,12 @@ class VmNet(BaseModel):
     net_prefix = models.CharField(max_length=40, null=True)
     net_purpose = models.CharField(max_length=40, null=True)
 
+
 class HostnameRules(BaseModel):
     hostname_rules = models.CharField(max_length=40, null=True)
     address = models.CharField(max_length=40, null=True)
 
+
 class VmnameRules(BaseModel):
     vmname_rules = models.CharField(max_length=40, null=True)
-    bussiness = models.CharField(max_length=40, null=True)
-
-
+    business = models.CharField(max_length=40, null=True)

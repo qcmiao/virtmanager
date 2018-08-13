@@ -18,29 +18,172 @@
 {% include "header.html" %}
 
 <div class="panel panel-default">
-    <!-- Default panel contents -->
+    <div class="panel-heading"><h3>配置选项</h3></div>
 
-    <div class="panel-heading">
-        <h3>
-            配置选项
-        </h3>
-        <div class="panel-body">
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#addRulesModal">
+        添加物理机命名规则
+    </button>
+    <div class="panel-body">
+        <table class="table table-bordered table-hover table-condensed">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>物理机名简写</th>
+                <th>对应所在节点</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
 
-            <table class="table table-bordered table-hover table-condensed">
-                <thead>
-                <tr>
-                    <th>序号</th>
-                    <th>物理机名简写</th>
-                    <th>对应所在节点</th>
-                </tr>
-                </thead>
-            </table>
+            {% for info in hostname_info %}
+            <tr>
+                <td>
+                    {{ forloop.counter }}
+                </td>
+                <td>
+                    {% if info.hostname_rules %}
+                    {{ info.hostname_rules }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if info.address %}
+                    {{ info.address }}
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-whaterver="123" onclick="edititem('{{ info.id }}')">
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </button>
+                    </div>
+
+
+                    <div class="btn-group">
+                        <button type="button" class="btn  btn-default btn-xs delete_btn" value="{{ info.id }}">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="modal fade" id="addRulesModal" tabindex="-1" role="dialog" aria-labelledby="addRulesModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加物理机命名规则</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="hostNameRules" class="col-sm-5 control-label">物理机名缩写</label>
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control" id="hostNameRules" placeholder="例：hz-zt">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="addressRules" class="col-sm-5 control-label">机房位置</label>
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control" id="addressRules" placeholder="例：杭州-转塘">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary AddHostRules_btn">提交</button>
+            </div>
         </div>
     </div>
 </div>
+
+
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
 <script src="/static/bootstrap-3.3.7-dist/js/jquery.min.js"></script>
 <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
 <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+
+<script>
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        }
+    });
+</script>
+
+<script>
+    $(".AddHostRules_btn").click(function(e) {
+        e.preventDefault();
+        var hostrules = $("#hostNameRules").val();
+        var addressrules = $("#addressRules").val();
+        $.ajax({
+            type: "POST",
+            url: "/hostrules-add/",
+            data: {
+                hostname: hostrules,
+                address: addressrules,
+            },
+            success: function(result) {
+                location.reload(true);
+            },
+            error: function(result) {
+                alert('error');
+                location.reload(true);
+            }
+        });
+    });
+</script>
+
+<script>
+    $(".delete_btn").click(function(e) {
+        e.preventDefault();
+        var r=confirm("确定删除");
+        if (r==true)
+        {
+            $.ajax({
+                type: "POST",
+                url: "/hostrules-del/",
+                data: {
+                    hostname: $(this).val(), // < note use of 'this' here
+                    // access_token: $("#access_token").val()
+                },
+                success: function(result) {
+                    // alert('ok');
+                    location.reload(true);
+                },
+                error: function(result) {
+                    alert('error');
+                    location.reload(true);
+                }
+            });
+        }
+
+    });
+</script>
+
 </body>
 </html>

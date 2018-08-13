@@ -78,24 +78,24 @@ class LibvirtClient:
         hostname = self.conn.getHostname()
         return hostname
 
-    def get_address(self):
-        address_temp = self.get_hostname()[:-3]
-        address_dic = {
-            "bj-gt": "北京-工体",
-            "sh-gq": "上海-桂桥",
-            "gz-hxy": "广州-华新园",
-            "sz-sjhl": "深圳-世纪互联",
-            "cd-zl": "成都-中立",
-            "hz-zt": "杭州-转塘",
-            "wh-yl": "武汉-银联",
-            "tj-tf": "天津-天纺"
-        }
-        try:
-            host_address = address_dic[address_temp]
-        except Exception, e:
-            print e, "has no match address"
-            host_address = ""
-        return host_address
+    # def get_address(self):
+    #     address_temp = self.get_hostname()[:-3]
+    #     address_dic = {
+    #         "bj-gt": "北京-工体",
+    #         "sh-gq": "上海-桂桥",
+    #         "gz-hxy": "广州-华新园",
+    #         "sz-sjhl": "深圳-世纪互联",
+    #         "cd-zl": "成都-中立",
+    #         "hz-zt": "杭州-转塘",
+    #         "wh-yl": "武汉-银联",
+    #         "tj-tf": "天津-天纺"
+    #     }
+    #     try:
+    #         host_address = address_dic[address_temp]
+    #     except Exception, e:
+    #         print e, "has no match address"
+    #         host_address = ""
+    #     return host_address
 
     def get_vm_list(self):
         vm_obj_list = self.conn.listAllDomains()
@@ -257,7 +257,7 @@ def update_vm_info(host):
         host.cpu_remain = host_info['host_cpu_info'] - cpu_sum
         host.mem_remain = host_info['host_mem_info'] - mem_sum
         host.host_name = lib_client.get_hostname()
-        host.address = lib_client.get_address()
+        # host.address = lib_client.get_address()
         pool_info = lib_client.get_pool_info()
         host.pool_capacity = pool_info['pool_capacity']
         host.pool_allocation = pool_info['pool_allocation']

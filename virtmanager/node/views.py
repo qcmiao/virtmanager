@@ -82,6 +82,7 @@ def vmname_conf(request):
 @login_required
 def hostviewer(request):
     host_info_list = HostMachine.objects.all().order_by('-id')
+    hostname_info = HostnameRules.objects.all()
     paginator = Paginator(host_info_list, 10)  # Show 10 host per page
     page = request.GET.get('page')
     try:
@@ -90,7 +91,7 @@ def hostviewer(request):
         host_info = paginator.page(1)
     except EmptyPage:
         host_info = paginator.page(paginator.num_pages)
-    return render(request, 'host_list.html', {'host_info': host_info})
+    return render(request, 'host_list.html', {'host_info': host_info, 'hostname_info': hostname_info})
 
 
 @login_required
@@ -191,6 +192,33 @@ def host_del(request):
     host.delete()
     return HttpResponse('success')
 
+@login_required
+def hostrules_add(request):
+    hostname = request.POST.get('hostname').strip()
+    address = request.POST.get('address').strip()
+    HostnameRules.objects.create(hostname_rules=hostname, address=address)
+    return HttpResponse('success')
+
+@login_required
+def hostrules_del(request):
+    hostnameid = request.POST.get('hostname')
+    hostnamerules = HostnameRules.objects.filter(id=hostnameid)
+    hostnamerules.delete()
+    return HttpResponse('success')
+
+@login_required
+def vmrules_add(request):
+    vmname = request.POST.get('vmname').strip()
+    business = request.POST.get('business').strip()
+    VmnameRules.objects.create(vmname_rules=vmname, business=business)
+    return HttpResponse('success')
+
+@login_required
+def vmrules_del(request):
+    vmnameid = request.POST.get('vmname')
+    vmnamerules = VmnameRules.objects.filter(id=vmnameid)
+    vmnamerules.delete()
+    return HttpResponse('success')
 
 
 
