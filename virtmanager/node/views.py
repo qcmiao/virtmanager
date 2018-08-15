@@ -184,6 +184,13 @@ def host_add(request):
     return HttpResponse('success')
 
 @login_required
+def host_edit(request):
+    host_id = request.POST.get('host_id')
+    desc= request.POST.get('desc').strip()
+    HostMachine.objects.filter(id=host_id).update(description=desc)
+    return HttpResponse('success')
+
+@login_required
 def host_del(request):
     hostid = request.POST.get('id')
     vm = VirtMachine.objects.filter(host_machine_id=hostid)
@@ -194,9 +201,18 @@ def host_del(request):
 
 @login_required
 def hostrules_add(request):
-    hostname = request.POST.get('hostname').strip()
+    hostname = request.POST.get('hostrules').strip()
     address = request.POST.get('address').strip()
     HostnameRules.objects.create(hostname_rules=hostname, address=address)
+    return HttpResponse('success')
+
+
+@login_required
+def hostrules_edit(request):
+    rules_id = request.POST.get('rules_id')
+    hostname = request.POST.get('hostrules').strip()
+    address = request.POST.get('addressrules').strip()
+    HostnameRules.objects.filter(id=rules_id).update(hostname_rules=hostname, address=address)
     return HttpResponse('success')
 
 @login_required
@@ -206,12 +222,23 @@ def hostrules_del(request):
     hostnamerules.delete()
     return HttpResponse('success')
 
+
 @login_required
 def vmrules_add(request):
     vmname = request.POST.get('vmname').strip()
     business = request.POST.get('business').strip()
     VmnameRules.objects.create(vmname_rules=vmname, business=business)
     return HttpResponse('success')
+
+
+@login_required
+def vmrules_edit(request):
+    rules_id = request.POST.get('rules_id')
+    vmname = request.POST.get('vmrules').strip()
+    business = request.POST.get('business').strip()
+    VmnameRules.objects.filter(id=rules_id).update(vmname_rules=vmname, business=business)
+    return HttpResponse('success')
+
 
 @login_required
 def vmrules_del(request):

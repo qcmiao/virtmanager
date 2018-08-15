@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <title>hostname_conf</title>
+    <title>vmname_conf</title>
 
     <!-- Bootstrap -->
     <link href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
@@ -53,7 +53,7 @@
                 </td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-whaterver="123" onclick="edititem('{{ info.id }}')">
+                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-rulesid={{ info.id }} data-vmrules={{ info.vmname_rules }} data-business={{ info.business }} >
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </button>
                     </div>
@@ -83,13 +83,13 @@
             <div class="modal-body">
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label for="vmNameRules" class="col-sm-5 control-label">虚机名缩写</label>
+                        <label for="vmNameRules" class="col-sm-5 control-label">虚机名缩写：</label>
                         <div class="col-sm-5">
                             <input type="text" class="form-control" id="vmNameRules" placeholder="例：xb-dx">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="business" class="col-sm-5 control-label">业务名称</label>
+                        <label for="business" class="col-sm-5 control-label">对应业务名称：</label>
                         <div class="col-sm-5">
                             <input type="text" class="form-control" id="business" placeholder="例：小八-电信">
                         </div>
@@ -104,6 +104,35 @@
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="editModalLabel">虚机命名规则</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <input type="hidden" class="form-control"  id="editrulesid">
+
+                        <label for="editvmrules" class="control-label">虚机名简写：</label>
+                            <input type="text" class="form-control"  id="editvmrules">
+                    </div>
+                    <div class="form-group">
+                        <label for="editbusiness" class="control-label">对应业务名称：</label>
+                            <input type="text" class="form-control" id="editbusiness">
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary EditVmRules_btn">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
 <script src="/static/bootstrap-3.3.7-dist/js/jquery.min.js"></script>
@@ -160,6 +189,45 @@
 </script>
 
 <script>
+    $("#editModal").on("show.bs.modal", function (e) {
+        var rules_id = $(e.relatedTarget).data("rulesid");
+        var vmrules = $(e.relatedTarget).data("vmrules");
+        var business = $(e.relatedTarget).data("business");
+        $('#editrulesid').val(rules_id);
+        $('#editvmrules').val(vmrules);
+        $('#editbusiness').val(business);
+
+    })
+
+</script>
+
+<script>
+    $(".EditVmRules_btn").click(function(e) {
+        e.preventDefault();
+        var rules_id = $("#editrulesid").val();
+        var vmrules = $("#editvmrules").val();
+        var business = $("#editbusiness").val();
+        $.ajax({
+            type: "POST",
+            url: "/vmrules-edit/",
+            data: {
+                rules_id: rules_id,
+                vmrules: vmrules,
+                business: business,
+            },
+            success: function(result) {
+                location.reload(true);
+            },
+            error: function(result) {
+                alert('error');
+                location.reload(true);
+            }
+        });
+    });
+</script>
+
+
+<script>
     $(".delete_btn").click(function(e) {
         e.preventDefault();
         var r=confirm("确定删除");
@@ -183,6 +251,8 @@
 
     });
 </script>
+
+
 
 </body>
 </html>

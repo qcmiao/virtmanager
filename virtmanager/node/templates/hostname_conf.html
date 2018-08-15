@@ -52,7 +52,7 @@
                 </td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-whaterver="123" onclick="edititem('{{ info.id }}')">
+                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-rulesid={{ info.id }} data-hostrules={{ info.hostname_rules }} data-address={{ info.address }} >
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </button>
                     </div>
@@ -82,13 +82,13 @@
             <div class="modal-body">
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label for="hostNameRules" class="col-sm-5 control-label">物理机名缩写</label>
+                        <label for="hostNameRules" class="col-sm-5 control-label">物理机名缩写：</label>
                         <div class="col-sm-5">
                             <input type="text" class="form-control" id="hostNameRules" placeholder="例：hz-zt">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="addressRules" class="col-sm-5 control-label">机房位置</label>
+                        <label for="addressRules" class="col-sm-5 control-label">机房位置位置：</label>
                         <div class="col-sm-5">
                             <input type="text" class="form-control" id="addressRules" placeholder="例：杭州-转塘">
                         </div>
@@ -103,6 +103,36 @@
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="editModalLabel">物理机命名规则</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                                        <!--<div class="form-group">-->
+                        <!--<label  type="hidden" for="editrulesid" class="control-label">id：</label>-->
+                            <input type="hidden"  class="form-control"  id="editrulesid" disabled>
+                    <!--</div>-->
+                    <div class="form-group">
+                        <label for="edithostrules" class="control-label">物理机名简写：</label>
+                            <input type="text" class="form-control"  id="edithostrules">
+                    </div>
+                    <div class="form-group">
+                        <label for="editaddress" class="control-label">对应机房位置：</label>
+                            <input type="text" class="form-control" id="editaddress">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary EditHostRules_btn">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
 <script src="/static/bootstrap-3.3.7-dist/js/jquery.min.js"></script>
@@ -144,8 +174,44 @@
             type: "POST",
             url: "/hostrules-add/",
             data: {
-                hostname: hostrules,
+                hostrules: hostrules,
                 address: addressrules,
+            },
+            success: function(result) {
+                location.reload(true);
+            },
+            error: function(result) {
+                alert('error');
+                location.reload(true);
+            }
+        });
+    });
+</script>
+
+<script>
+    $("#editModal").on("show.bs.modal", function (e) {
+        var hostrules= $(e.relatedTarget).data("hostrules");
+        var address = $(e.relatedTarget).data("address");
+        var rules_id = $(e.relatedTarget).data("rulesid");
+        $('#editrulesid').val(rules_id);
+        $('#edithostrules').val(hostrules);
+        $('#editaddress').val(address);
+    })
+</script>
+
+<script>
+    $(".EditHostRules_btn").click(function(e) {
+        e.preventDefault();
+        var rules_id = $("#editrulesid").val();
+        var hostrules = $("#edithostrules").val();
+        var addressrules = $("#editaddress").val();
+        $.ajax({
+            type: "POST",
+            url: "/hostrules-edit/",
+            data: {
+                rules_id: rules_id,
+                hostrules: hostrules,
+                addressrules: addressrules,
             },
             success: function(result) {
                 location.reload(true);

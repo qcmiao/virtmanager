@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^host_list/$', views.hostviewer),
     # url(r'^host_list/?id=(?P<pk>[\d]+)$', views.hostviewer_detail),
     url(r'^host-add/$', views.host_add),
+    url(r'^host-edit/$', views.host_edit),
     url(r'^host-del/$', views.host_del),
 
     url(r'^vm_list/$', views.vmviewer),
@@ -38,8 +39,11 @@ urlpatterns = [
     url(r'^hostname_conf/$', views.hostname_conf),
     url(r'^vmname_conf/$', views.vmname_conf),
     url(r'^hostrules-add/$', views.hostrules_add),
+    url(r'^hostrules-edit/$', views.hostrules_edit),
     url(r'^hostrules-del/$', views.hostrules_del),
+
     url(r'^vmrules-add/$', views.vmrules_add),
+    url(r'^vmrules-edit/$', views.vmrules_edit),
     url(r'^vmrules-del/$', views.vmrules_del),
 
 ]

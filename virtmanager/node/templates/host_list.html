@@ -116,11 +116,10 @@
                 </td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-whaterver="123" onclick="edititem('{{ info.id }}')">
+                        <button type="button" class="btn btn-default btn-xs " data-toggle="modal" data-target="#editModal" data-hostid={{ info.id }} data-hostip={{ info.host_ip }} data-hostname={{ info.host_name }} data-desc={{ info.description }}>
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </button>
                     </div>
-
 
                     <div class="btn-group">
                         <button type="button" class="btn  btn-default btn-xs delete_btn" value="{{ info.id }}">
@@ -202,25 +201,18 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                 <h4 class="modal-title" id="editModalLabel">物理机信息</h4>
             </div>
-            <!--<div class="modal-body">-->
-            <!--<form>-->
-            <!--<div class="form-group">-->
-            <!--<label for="edithostip" class="control-label">物理机IP:</label>-->
-            <!--<input type="text" class="form-control" id="edithostip">-->
-            <!--</div>-->
-            <!--<div class="form-group">-->
-            <!--<label for="editdesc" class="control-label">备注:</label>-->
-            <!--<input type="text" class="form-control" id="editdesc">-->
-            <!--</div>-->
-            <!--</form>-->
-            <!--</div>-->
-
             <div class="modal-body">
+                <input type="hidden" class="form-control"  id="edithostid" disabled>
                 <form>
                     <div class="form-group">
                         <label for="edithostip" class="control-label">物理机IP:</label>
-                        <input type="text" class="form-control" id="edithostip" disabled>
+                            <input type="text" class="form-control"  id="edithostip" disabled>
                     </div>
+                    <div class="form-group">
+                        <label for="edithostname" class="control-label">物理机名:</label>
+                            <input type="text" class="form-control" id="edithostname" disabled>
+                    </div>
+
                     <div class="form-group">
                         <label for="editdesc" class="control-label">备注:</label>
                         <input type="text" class="form-control" id="editdesc">
@@ -229,7 +221,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" onclick="edititem(this)">提交</button>
+                <button type="button" class="btn btn-primary EditHost_btn">提交</button>
             </div>
         </div>
     </div>
@@ -290,6 +282,48 @@
     });
 </script>
 
+<script>
+    $("#editModal").on("show.bs.modal", function (e) {
+        var hostid = $(e.relatedTarget).data("hostid");
+        var hostip = $(e.relatedTarget).data("hostip");
+        var hostname = $(e.relatedTarget).data("hostname");
+        var desc = $(e.relatedTarget).data("desc");
+        $('#edithostid').val(hostid);
+        $('#edithostip').val(hostip);
+        $('#edithostname').val(hostname);
+        $('#editdesc').val(desc);
+
+        console.log(hostip);
+    })
+</script>
+
+<script>
+    $(".EditHost_btn").click(function(e) {
+        e.preventDefault();
+        var host_id = $("#edithostid").val();
+        var hostrules = $("#edithostrules").val();
+        var addressrules = $("#editaddress").val();
+        var desc = $("#editdesc").val();
+
+        $.ajax({
+            type: "POST",
+            url: "/host-edit/",
+            data: {
+                host_id: host_id,
+                hostrules: hostrules,
+                addressrules: addressrules,
+                desc: desc,
+            },
+            success: function(result) {
+                location.reload(true);
+            },
+            error: function(result) {
+                alert('error');
+                location.reload(true);
+            }
+        });
+    });
+</script>
 
 <script>
     $(".delete_btn").click(function(e) {
@@ -301,11 +335,9 @@
                 type: "POST",
                 url: "/host-del/",
                 data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
+                    id: $(this).val(),
                 },
                 success: function(result) {
-                    // alert('ok');
                     location.reload(true);
                 },
                 error: function(result) {
@@ -318,80 +350,14 @@
     });
 </script>
 
-<!--<script>-->
-<!--$("editModal").modal("hide");-->
-<!--function edititem(obj){-->
-<!--console.log(obj)-->
-<!--$('#edithostip').val(obj);-->
-<!--$('#editdesc').val(obj);-->
-<!--// $('#editModal').modal('show');-->
-<!--}-->
-<!--</script>-->
-
-<script>
-    $('#editModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget) 
-        var recipient = button.data('whatever')
-        var modal = $(this)
-        modal.find('.modal-title').text('New message to11 ' + recipient)
-        modal.find('.modal-body input').val(recipient)
-    })
-</script>
-
-<script>
-    function edititem(obj){
-        console.log(obj)
-        var tr=$(obj).parent().parent();
-        var hostip_obj = tr.children("td#Host_Ip").text();
-        var desc_obj = tr.children("td#Host_Desc").text();
-        $('#edithostip').val(hostip_obj);
-        $('#editdesc').val(desc_obj);
-        $('#editModal').modal('show');
-    }
-</script>
 
 
 
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@fat1">Open modal for @fat</button>
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">Open modal for @getbootstrap</button>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">New message</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <label for="recipient-name" class="control-label">Recipient:</label>
-                        <input type="text" class="form-control" id="recipient-name">
-                    </div>
-                    <div class="form-group">
-                        <label for="message-text" class="control-label">Message:</label>
-                        <textarea class="form-control" id="message-text"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Send message</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<script>
-    $('#exampleModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget) // Button that triggered the modal
-        var recipient = button.data('whatever')
-        var modal = $(this)
-        modal.find('.modal-title').text('New message to ' + recipient)
-        modal.find('.modal-body input').val(recipient)
-    })
-</script>
 </body>
 </html>
+
+
+
 
