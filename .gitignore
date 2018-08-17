@@ -2,3 +2,4 @@
 *.idea
 .venv
 virtmanager/node/migrations/*
+virtmanager/vmtokens/*

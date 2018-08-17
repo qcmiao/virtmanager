@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, get_object_or_404
 from node.models import VirtMachine, HostMachine, VmNet, BridgeNet, HostNet, Switch, SwitchPort, HostnameRules, VmnameRules
-from .vm_ctl import start_vm, reboot_vm, destroy_vm, suspend_vm
-from django.http import HttpResponse
+from .vm_ctl import start_vm, reboot_vm, destroy_vm, suspend_vm, vnc_vm
+from django.http import HttpResponse, HttpResponseRedirect
 import threading
 
 from django.contrib.auth.decorators import login_required
@@ -176,6 +176,18 @@ def vm_suspend(request):
     threading.Thread(target=suspend_vm, args=(host_ip, virt_id)).start()
     return HttpResponse('success')
 
+@login_required
+def vm_vnc(request):
+    vmid = request.POST.get('id')
+    vm = VirtMachine.objects.get(id=vmid)
+    virt_id = vm.vm_id
+    host_id = vm.host_machine_id
+    host = HostMachine.objects.get(id=host_id)
+    host_ip = host.host_ip
+    # threading.Thread(target=vnc_vm, args=(host_ip, virt_id)).start()
+    vnc_url = vnc_vm(host_ip, virt_id)
+    # return render(request, vnc_url)
+    return HttpResponse(vnc_url)
 @login_required
 def host_add(request):
     hostip = request.POST.get('ip').strip()

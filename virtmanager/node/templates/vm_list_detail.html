@@ -98,6 +98,10 @@
                     <div class="btn-group">
                         <button type="button" class="btn btn-success resume_btn" value="{{ info.id }}">恢复</button>
                     </div>
+                     <div class="btn-group">
+                        <button type="button" class="btn btn-default vnc_btn" value="{{ info.id }}">VNC</button>
+                    </div>
+
                     <!--<div class="btn-group">-->
                     <!--<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
                     <!--Action <span class="caret"></span>-->
@@ -185,8 +189,7 @@
                 type: "POST",
                 url: "/start-vm/",
                 data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
+                    id: $(this).val(),
                 },
                 success: function(result) {
                     alert('ok');
@@ -209,8 +212,7 @@
                 type: "POST",
                 url: "/reboot-vm/",
                 data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
+                    id: $(this).val(),
                 },
                 success: function (result) {
                     alert('ok');
@@ -232,8 +234,7 @@
                 type: "POST",
                 url: "/shutdown-vm/",
                 data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
+                    id: $(this).val(),
                 },
                 success: function (result) {
                     alert('ok');
@@ -255,8 +256,7 @@
                 type: "POST",
                 url: "/suspend-vm/",
                 data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
+                    id: $(this).val(),
                 },
                 success: function (result) {
                     alert('ok');
@@ -278,11 +278,32 @@
                 type: "POST",
                 url: "/resume-vm/",
                 data: {
-                    id: $(this).val(), // < note use of 'this' here
-                    // access_token: $("#access_token").val()
+                    id: $(this).val(),
                 },
                 success: function (result) {
                     alert('ok');
+                },
+                error: function (result) {
+                    alert('error');
+                }
+            });
+        }
+    });
+</script>
+<script>
+    $(".vnc_btn").click(function(e) {
+        e.preventDefault();
+        {
+            $.ajax({
+                type: "POST",
+                url: "/vnc-vm/",
+                data: {
+                    id: $(this).val(),
+                },
+                success: function (result) {
+                    // alert('ok');
+                    alert(result);
+                    // $("#vncModal").modal();
                 },
                 error: function (result) {
                     alert('error');

@@ -33,6 +33,8 @@ urlpatterns = [
     url(r'^shutdown-vm/$', views.vm_destroy),
     url(r'^suspend-vm/$', views.vm_suspend),
     url(r'^resume-vm/$', views.vm_suspend),
+    url(r'^vnc-vm/$', views.vm_vnc),
+
 
     url(r'^login/$', views.LoginView.as_view(), name='login'),
     url(r'^logout/$', views.logout, name='logout'),
