@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
 from django.shortcuts import render, get_object_or_404
 from node.models import VirtMachine, HostMachine, VmNet, BridgeNet, HostNet, Switch, SwitchPort, HostnameRules, VmnameRules
 from .vm_ctl import start_vm, reboot_vm, destroy_vm, suspend_vm, vnc_vm
 from django.http import HttpResponse, HttpResponseRedirect
 import threading
-
+# from .hostinfo_get import *
 from django.contrib.auth.decorators import login_required
 from django.views.generic import View
 from django.shortcuts import render
@@ -18,10 +17,9 @@ from django.core.urlresolvers import reverse
 from django.http import (HttpResponseRedirect,
                          JsonResponse,
                          HttpResponseForbidden)
-
 from rest_framework.views import APIView
-
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import os
 
 # Create your views here.
 
@@ -176,6 +174,7 @@ def vm_suspend(request):
     threading.Thread(target=suspend_vm, args=(host_ip, virt_id)).start()
     return HttpResponse('success')
 
+
 @login_required
 def vm_vnc(request):
     vmid = request.POST.get('id')
@@ -184,10 +183,10 @@ def vm_vnc(request):
     host_id = vm.host_machine_id
     host = HostMachine.objects.get(id=host_id)
     host_ip = host.host_ip
-    # threading.Thread(target=vnc_vm, args=(host_ip, virt_id)).start()
     vnc_url = vnc_vm(host_ip, virt_id)
-    # return render(request, vnc_url)
     return HttpResponse(vnc_url)
+
+
 @login_required
 def host_add(request):
     hostip = request.POST.get('ip').strip()
@@ -195,12 +194,20 @@ def host_add(request):
     HostMachine.objects.create(host_ip=hostip, description=description)
     return HttpResponse('success')
 
+
+@login_required
+def host_update(request):
+    os.system('/watone/.venv/bin/python /watone/virtmanager/node/hostinfo_get.py ')
+    return HttpResponse('success')
+
+
 @login_required
 def host_edit(request):
     host_id = request.POST.get('host_id')
     desc= request.POST.get('desc').strip()
     HostMachine.objects.filter(id=host_id).update(description=desc)
     return HttpResponse('success')
+
 
 @login_required
 def host_del(request):
@@ -210,6 +217,14 @@ def host_del(request):
     host = HostMachine.objects.get(id=hostid)
     host.delete()
     return HttpResponse('success')
+
+
+@login_required
+def host_refresh(request):
+    hostid = request.POST.get('id')
+    os.system('/watone/.venv/bin/python /watone/virtmanager/node/hostinfo_refresh.py {}'.format(hostid))
+    return HttpResponse('success')
+
 
 @login_required
 def hostrules_add(request):
@@ -226,6 +241,7 @@ def hostrules_edit(request):
     address = request.POST.get('addressrules').strip()
     HostnameRules.objects.filter(id=rules_id).update(hostname_rules=hostname, address=address)
     return HttpResponse('success')
+
 
 @login_required
 def hostrules_del(request):

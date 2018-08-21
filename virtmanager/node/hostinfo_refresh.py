@@ -261,8 +261,12 @@ def update_vm_info(host):
 
 
 if __name__ == '__main__':
-    # host_list = HostMachine.objects.all()
-    host_list = HostMachine.objects.filter(host_ip='30.207.40.56')
+    hostid=sys.argv[1]
+    host_obj = HostMachine.objects.filter(id=hostid)
+    for i in host_obj:
+        hostip = i.host_ip
+    print hostip,'start refresh'
+    host_list = HostMachine.objects.filter(host_ip=hostip)
     pools = multiprocessing.Pool(4)
     for h in host_list:
         pools.apply_async(update_vm_info, (h,))

@@ -156,33 +156,6 @@
     </div>
 </div>
 
-<!--<button class="btn btn-primary" type="button">点击我</button>-->
-<!-- 模态弹出窗内容 -->
-<div class="modal" id="vncModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title">vnc地址</h4>
-            </div>
-            <div class="modal-body">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <div class="col-sm-10">
-                            <a id="vncurl" >vnc链接</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
-
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
 <script src="/static/bootstrap-3.3.7-dist/js/jquery.min.js"></script>
 <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
@@ -338,8 +311,7 @@
                 },
                 success: function (result) {
                     // alert('ok');
-                    alert(result);
-                    // $("#vncModal").modal();
+                    window.open(result)
                 },
                 error: function (result) {
                     alert('error');
@@ -347,15 +319,6 @@
             });
         }
     });
-</script>
-
-
-<script>
-    $("#vncModal").on("show.bs.modal", function (e) {
-        var vncurl = $(e.relatedTarget).data("vncurl");
-        $('#vncurl').val(vncurl);
-
-    })
 </script>
 </body>
 </html>

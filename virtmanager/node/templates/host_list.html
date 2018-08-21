@@ -19,8 +19,11 @@
 
 <div class="panel panel-default">
     <div class="panel-heading"><h3>物理机列表</h3></div>
-    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+    <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#myModal">
         添加物理机
+    </button>
+    <button type="button" class="btn btn-primary update_btn">
+        更新信息
     </button>
     <div class="panel-body">
         <table class="table table-bordered table-hover table-condensed">
@@ -47,7 +50,7 @@
                 <td>
                     {{ forloop.counter|counter:host_info.number }}
                 </td>
-                <td id="Host_Name">
+                <td>
                     {% if info.host_name %}
                     {{ info.host_name }}
                     {% endif %}
@@ -59,7 +62,7 @@
                     {% endif %}
                     {% endfor %}
                 </td>
-                <td id="Host_Ip">
+                <td>
                     {% if info.host_ip %}
                     {{ info.host_ip }}
                     {% endif %}
@@ -124,6 +127,12 @@
                     <div class="btn-group">
                         <button type="button" class="btn  btn-default btn-xs delete_btn" value="{{ info.id }}">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </button>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn  btn-default btn-xs refresh_btn" value="{{ info.id }}">
+                            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         </button>
                     </div>
                 </td>
@@ -283,6 +292,28 @@
 </script>
 
 <script>
+    $(".update_btn").click(function(e) {
+        e.preventDefault();
+        var r=confirm("确定更新");
+        if (r==true)
+        {
+            $.ajax({
+                type: "POST",
+                url: "/host-update/",
+                // success: function (result) {
+                //     alert('ok');
+                // },
+                error: function (result) {
+                    alert('error');
+                }
+            });
+        }
+    });
+</script>
+
+
+
+<script>
     $("#editModal").on("show.bs.modal", function (e) {
         var hostid = $(e.relatedTarget).data("hostid");
         var hostip = $(e.relatedTarget).data("hostip");
@@ -350,11 +381,31 @@
     });
 </script>
 
+<script>
+    $(".refresh_btn").click(function(e) {
+        e.preventDefault();
+        var r=confirm("确定同步");
+        if (r==true)
+        {
+            $.ajax({
+                type: "POST",
+                url: "/host-refresh/",
+                data: {
+                    id: $(this).val(),
+                },
+                success: function(result) {
+                    alert('ok');
+                    location.reload(true);
+                },
+                error: function(result) {
+                    alert('error');
+                    location.reload(true);
+                }
+            });
+        }
 
-
-
-
-
+    });
+</script>
 </body>
 </html>
 

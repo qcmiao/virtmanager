@@ -23,8 +23,10 @@ urlpatterns = [
     url(r'^host_list/$', views.hostviewer),
     # url(r'^host_list/?id=(?P<pk>[\d]+)$', views.hostviewer_detail),
     url(r'^host-add/$', views.host_add),
+    url(r'^host-update/$', views.host_update),
     url(r'^host-edit/$', views.host_edit),
     url(r'^host-del/$', views.host_del),
+    url(r'^host-refresh/$', views.host_refresh),
 
     url(r'^vm_list/$', views.vmviewer),
     url(r'^vm_list/(?P<pk>[\d]+)/$', views.vmviewer_detail),

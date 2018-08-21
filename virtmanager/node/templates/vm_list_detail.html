@@ -26,6 +26,9 @@
             {% endif %}
         </h3>
     </div>
+    <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#addVmModal">
+        新建虚机
+    </button>
     <div class="panel-body">
         <table class="table table-bordered table-hover table-condensed">
             <thead>
@@ -61,11 +64,11 @@
                 </td>
                 <td>
                     {% if info.vm_status == '1' %}
-                        运行中
+                    运行中
                     {% elif info.vm_status == '3' %}
-                        暂停
+                    暂停
                     {% elif info.vm_status == '5' %}
-                        关机
+                    关机
                     {% endif %}
                 <td>
                     {% if info.cpu_num  %}
@@ -98,8 +101,8 @@
                     <div class="btn-group">
                         <button type="button" class="btn btn-success resume_btn" value="{{ info.id }}">恢复</button>
                     </div>
-                     <div class="btn-group">
-                        <button type="button" class="btn btn-default vnc_btn" value="{{ info.id }}">VNC</button>
+                    <div class="btn-group">
+                        <button type="button" data-loading-text="Loading..." class="btn btn-default vnc_btn" value="{{ info.id }}">VNC</button>
                     </div>
 
                     <!--<div class="btn-group">-->
@@ -144,6 +147,64 @@
         </nav>
 
     </div>
+</div>
+
+
+<div class="modal fade" id="addVmModal" tabindex="-1" role="dialog" aria-labelledby="addVmLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addVmLabel">新建虚机</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="vmid" class="col-sm-2 control-label">虚机名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="vmid" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ostype" class="col-sm-2 control-label">系统版本</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="ostype" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cpucores" class="col-sm-2 control-label">cpu</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="cpucores" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mem" class="col-sm-2 control-label">内存</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="mem" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="disk" class="col-sm-2 control-label">磁盘</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="disk" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cdrom" class="col-sm-2 control-label">CD-ROM</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="cdrom" >
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary add_btn">提交</button>
+            </div>
+        </div>
+
+    </div>
+</div>
 </div>
 
 
@@ -302,8 +363,7 @@
                 },
                 success: function (result) {
                     // alert('ok');
-                    alert(result);
-                    // $("#vncModal").modal();
+                    window.open(result)
                 },
                 error: function (result) {
                     alert('error');
@@ -312,7 +372,5 @@
         }
     });
 </script>
-
-
 </body>
 </html>
