@@ -16,7 +16,7 @@ ipaddress==1.0.22
 ipython==5.0.0
 ipython-genutils==0.2.0
 itsdangerous==0.24
-Jinja2==2.10
+Jinja2==2.11.3
 libvirt-python==4.4.0
 Markdown==2.6.11
 MarkupSafe==1.0
